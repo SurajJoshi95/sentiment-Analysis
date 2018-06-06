@@ -1,0 +1,68 @@
+---
+title: "Sentiment_Analysis_With_R"
+author: "Suraj Joshi"
+date: "2 May 2018"
+output: html_document
+---
+```{r}
+library(RSentiment)
+```
+
+
+```{r}
+filepath = "D:/STUDY/DSC417.1\ Unstructured\ Data\ Analysis/Program/Data/outputs/artidote_page_data.csv"
+
+page_data <- read.csv(filepath)
+dim(page_data)
+```
+
+```{r}
+#page_data$message 
+```
+
+```{r}
+calculate_sentiment("I love Data Science")
+calculate_sentiment("I hate low IQ people")
+str = c("I hate low IQ people",  " I have found that if you love life, life will love you back - Arthur Rubinstein. The reason people find it so hard to be happy is that they always see the past better than it was, the present worse than it is, and the future less resolved than it will be - Marcel Pagnol." , "i really hate loving you")
+calculate_sentiment(str)
+
+calculate_score(str)
+```
+```{r}
+calculate_sentiment(page_data$message) -> senti_artidote
+
+senti_artidote_labels = factor(senti_artidote$sentiment,
+                               ordered = TRUE,
+                               levels = c("Very Negative", "Negative" , "Neutral", "Positive", "Very Positive"))
+
+
+
+
+library(ggplot2)
+library(colorRamps)
+#colfunc <- colorRampPalette(c("red", "green"))
+#colfunc(10)
+
+
+data.frame(table(senti_artidote_labels)) -> se_df
+
+colfunc <- colorRampPalette(c("firebrick2", "limegreen"))
+
+ggplot(se_df, aes(x = senti_artidote_labels, y = Freq)) +
+  geom_bar(stat = "identity", fill = colfunc(5))
+```
+```{r}
+calculate_score(page_data$message) -> senti_score_artidote
+hist(senti_score_artidote)
+
+page_data$senti_score <- senti_score_artidote 
+```
+
+```{r}
+page_data = page_data %>%
+  mutate(senti = case_when(senti_score < 0 ~ "Negative",
+                           senti_score > 0 ~ "Positive",
+                           senti_score == 0 ~ "Neutral"))
+
+head(page_data)
+```
